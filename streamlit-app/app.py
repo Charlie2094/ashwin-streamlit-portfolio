@@ -29,41 +29,47 @@ def fetch_html(url: str) -> str:
     except Exception as e:
         return f"<h2 style='color:red;padding:40px;font-family:sans-serif;'>Failed to load: {e}</h2>"
 
-# ── CSS ──────────────────────────────────────────────────────
+# ── CSS — Hide toolbar, collapse button, fix sidebar ─────────
 st.markdown("""
 <style>
-  /* Remove extra padding */
+  /* ── Hide Streamlit top toolbar (white bar) ── */
+  [data-testid="stToolbar"]         { display: none !important; }
+  [data-testid="stDecoration"]      { display: none !important; }
+  [data-testid="stStatusWidget"]    { display: none !important; }
+  #MainMenu                         { display: none !important; }
+  footer                            { display: none !important; }
+  header                            { display: none !important; }
+
+  /* ── Hide sidebar collapse/expand button ── */
+  [data-testid="collapsedControl"]  { display: none !important; }
+  button[kind="header"]             { display: none !important; }
+
+  /* ── Remove all top padding ── */
   .block-container {
-    padding-top: 0.5rem !important;
+    padding-top: 0rem !important;
     padding-bottom: 0rem !important;
     padding-left: 0.5rem !important;
     padding-right: 0.5rem !important;
     max-width: 100% !important;
   }
 
-  /* Hide Streamlit branding */
-  #MainMenu { visibility: hidden; }
-  footer    { visibility: hidden; }
-
-  /* Force sidebar always visible */
+  /* ── Sidebar fixed width ── */
   [data-testid="stSidebar"] {
-    min-width: 260px !important;
-    max-width: 260px !important;
+    min-width: 265px !important;
+    max-width: 265px !important;
+    background: #1e2130 !important;
   }
-  [data-testid="stSidebarNav"] { display: none; }
 
-  /* Profile card */
+  /* ── Profile card ── */
   .profile-card {
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px;
-    padding: 14px;
-    margin-bottom: 10px;
-    text-align: center;
+    border-radius: 12px; padding: 14px;
+    margin-bottom: 10px; text-align: center;
   }
   .profile-avatar {
     width: 52px; height: 52px; border-radius: 50%;
-    background: linear-gradient(135deg, #e94560, #8b5cf6);
+    background: linear-gradient(135deg,#e94560,#8b5cf6);
     display: flex; align-items: center; justify-content: center;
     font-size: 18px; font-weight: 800;
     margin: 0 auto 8px; color: white;
@@ -78,7 +84,7 @@ st.markdown("""
     border: 1px solid rgba(16,185,129,0.3);
   }
 
-  /* Metrics */
+  /* ── Metrics ── */
   .metric-row {
     display: grid; grid-template-columns: repeat(2,1fr);
     gap: 6px; margin-bottom: 10px;
@@ -91,7 +97,7 @@ st.markdown("""
   .metric-val { font-size: 18px; font-weight: 800; line-height: 1; }
   .metric-lbl { font-size: 9.5px; opacity: 0.4; margin-top: 2px; }
 
-  /* Links */
+  /* ── Quick links ── */
   .qlink {
     display: flex; align-items: center; gap: 7px;
     padding: 7px 12px; border-radius: 8px;
@@ -106,21 +112,43 @@ st.markdown("""
   .qlink-blue  { background:rgba(59,130,246,0.12)!important; border-color:rgba(59,130,246,0.3)!important; color:#60a5fa!important; }
   .qlink-red   { background:rgba(233,69,96,0.12)!important;  border-color:rgba(233,69,96,0.3)!important;  color:#ff7d94!important; }
 
-  /* Section label */
+  /* ── Section label ── */
   .slabel {
     font-size: 9px; font-weight: 700;
     text-transform: uppercase; letter-spacing: 1.5px;
     opacity: 0.3; padding: 4px 0 5px; display: block;
   }
 
-  /* Download button */
+  /* ── Download button ── */
   .stDownloadButton > button {
     width: 100% !important;
     background: linear-gradient(135deg,#e94560,#c41d3c) !important;
     color: white !important; border: none !important;
     border-radius: 8px !important; font-weight: 700 !important;
   }
+
+  /* ── Radio nav styling ── */
+  [data-testid="stRadio"] > label { display: none !important; }
+  [data-testid="stRadio"] div[role="radiogroup"] {
+    gap: 4px !important;
+  }
+  [data-testid="stRadio"] label {
+    border-radius: 8px !important;
+    padding: 9px 14px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    width: 100% !important;
+  }
 </style>
+
+<script>
+  // Force sidebar to stay open on load
+  window.addEventListener('load', function() {
+    const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
+    if (sidebar) sidebar.style.display = 'flex';
+  });
+</script>
 """, unsafe_allow_html=True)
 
 
@@ -178,12 +206,12 @@ with st.sidebar:
 
     st.markdown("""
     <div style="font-size:9.5px;opacity:0.2;text-align:center;margin-top:10px;line-height:1.7;">
-    Auto-syncs from GitHub<br/>Updates within 5 mins
+    Auto-syncs from GitHub · Updates in 5 mins
     </div>
     """, unsafe_allow_html=True)
 
 
-# ── MAIN — NO extra header, just render HTML directly ────────
+# ── MAIN CONTENT ─────────────────────────────────────────────
 
 if "Portfolio" in page:
     html = fetch_html(URLS["portfolio"])
